@@ -1,11 +1,11 @@
 {
-  "name": "mcp-audit-server",
+  "name": "ledd-mcp-audit-server",
   "version": "2.0.0",
   "description": "MCP server interface for AI agent and MCP security auditing — config analysis, prompt injection testing, tool probing, data flow tracing",
   "type": "commonjs",
   "main": "index.js",
   "bin": {
-    "mcp-audit-server": "./cli.js"
+    "mcp-audit-server": "cli.js"
   },
   "scripts": {
     "mcp:start": "node mcp/index.js",
@@ -23,7 +23,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/joepangallo/mcp-audit-server"
+    "url": "git+https://github.com/joepangallo/mcp-audit-server.git"
   },
   "homepage": "https://github.com/joepangallo/mcp-audit-server#readme",
   "bugs": {

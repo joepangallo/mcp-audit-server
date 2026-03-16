@@ -9,8 +9,11 @@ Hosted backend access is not bundled with this package. If you want managed acce
 ## Install
 
 ```bash
-npm install mcp-audit-server
+npm install ledd-mcp-audit-server
 ```
+
+Install package: `ledd-mcp-audit-server`
+CLI command after install: `mcp-audit-server`
 
 The old package name `mcp-server-agent-security` is retired. See [MIGRATION.md](./MIGRATION.md) for upgrade steps and the deprecation plan.
 
@@ -23,7 +26,7 @@ Add to your MCP client configuration (Claude Desktop, Cursor, etc.):
   "mcpServers": {
     "mcp-audit-server": {
       "command": "npx",
-      "args": ["-y", "mcp-audit-server", "--mcp"]
+      "args": ["-y", "ledd-mcp-audit-server", "--mcp"]
     }
   }
 }

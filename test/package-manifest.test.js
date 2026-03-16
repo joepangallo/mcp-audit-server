@@ -24,7 +24,7 @@ test("npm pack dry-run includes the public proxy entrypoints", async () => {
     const packOutput = JSON.parse(stdout);
     const filePaths = new Set((packOutput[0] && packOutput[0].files ? packOutput[0].files : []).map((entry) => entry.path));
 
-    assert.equal(packOutput[0].name, "mcp-audit-server");
+    assert.equal(packOutput[0].name, "ledd-mcp-audit-server");
     assert.ok(filePaths.has("index.js"));
     assert.ok(filePaths.has("cli.js"));
     assert.ok(filePaths.has("CHANGELOG.md"));

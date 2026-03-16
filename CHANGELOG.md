@@ -4,7 +4,7 @@
 
 ### Breaking Changes
 - Scan engine moved to private API service. This package is now a thin MCP/CLI proxy.
-- Published package renamed to `mcp-audit-server` to distinguish it from the local scan engine.
+- Published package renamed to `ledd-mcp-audit-server` to avoid npm namespace collisions while keeping the CLI command as `mcp-audit-server`.
 - Removed `lib/` directory and all in-process scan modules.
 - Requires access to a private audit API.
 
