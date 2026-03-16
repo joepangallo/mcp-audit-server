@@ -4,8 +4,9 @@
 
 ### Breaking Changes
 - Scan engine moved to private API service. This package is now a thin MCP/CLI proxy.
+- Published package renamed to `mcp-audit-server` to distinguish it from the local scan engine.
 - Removed `lib/` directory and all in-process scan modules.
-- Requires a running agent-security audit API (default: http://127.0.0.1:3091).
+- Requires a running `mcp-security-audit` service or compatible audit API (default: http://127.0.0.1:3091).
 
 ### Added
 - Tool spoofing detection (CWE-290) — duplicate tool names, namespace collision

@@ -9,6 +9,7 @@ const AUDIT_API_HOST = process.env.AGENT_SECURITY_HOST || "127.0.0.1";
 const AUDIT_API_PORT = process.env.AGENT_SECURITY_PORT || "3091";
 const AUDIT_API_KEY = process.env.AGENT_SECURITY_API_KEY || "";
 const AUDIT_BASE_URL = `http://${AUDIT_API_HOST}:${AUDIT_API_PORT}`;
+const { version: APP_VERSION } = require("../package.json");
 
 const MCP_MAX_REQUESTS_PER_MINUTE = 30;
 const MCP_WINDOW_MS = 60_000;
@@ -231,7 +232,7 @@ async function main() {
   }
 
   const server = new Server(
-    { name: "mcp-server-agent-security", version: "1.2.0" },
+    { name: "mcp-audit-server", version: APP_VERSION || "0.0.0" },
     { capabilities: { tools: {} } }
   );
 

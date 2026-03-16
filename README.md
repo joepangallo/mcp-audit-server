@@ -1,14 +1,16 @@
-# mcp-server-agent-security
+# mcp-audit-server
 
-MCP server and CLI for AI agent and MCP security auditing. Connects to the agent-security audit API to analyze MCP configurations, test prompt injection resistance, trace data flows, scan packages, and generate security policies.
+Thin MCP server and CLI proxy for AI agent and MCP security auditing. Connects to a running `mcp-security-audit` service to analyze MCP configurations, test prompt injection resistance, trace data flows, scan packages, and generate security policies.
 
-This package is a thin proxy -- all scan logic runs on the private audit API (default: `http://127.0.0.1:3091`).
+This package is a thin proxy -- all scan logic runs on a separately running audit API (default: `http://127.0.0.1:3091`).
 
 ## Install
 
 ```bash
-npm install mcp-server-agent-security
+npm install mcp-audit-server
 ```
+
+The old package name `mcp-server-agent-security` is retired. See [MIGRATION.md](./MIGRATION.md) for upgrade steps and the deprecation plan.
 
 ## Usage as MCP Server
 
@@ -17,9 +19,9 @@ Add to your MCP client configuration (Claude Desktop, Cursor, etc.):
 ```json
 {
   "mcpServers": {
-    "agent-security": {
+    "mcp-audit-server": {
       "command": "npx",
-      "args": ["-y", "mcp-server-agent-security", "--mcp"]
+      "args": ["-y", "mcp-audit-server", "--mcp"]
     }
   }
 }
@@ -45,37 +47,37 @@ The CLI forwards commands to the audit API.
 
 ```bash
 # Audit an MCP configuration file
-agent-security scan-config ./claude_desktop_config.json
+mcp-audit-server scan-config ./claude_desktop_config.json
 
 # Probe a live MCP server (requires AGENT_SECURITY_ADMIN_MODE=1)
-agent-security scan-server npx -y @modelcontextprotocol/server-filesystem /tmp
+mcp-audit-server scan-server npx -y @modelcontextprotocol/server-filesystem /tmp
 
 # Scan an npm package for vulnerabilities
-agent-security scan-package @modelcontextprotocol/server-shell
+mcp-audit-server scan-package @modelcontextprotocol/server-shell
 
 # Test a system prompt for injection vulnerabilities
-agent-security scan-injection ./system-prompt.txt
+mcp-audit-server scan-injection ./system-prompt.txt
 
 # Trace data flows through an MCP config
-agent-security scan-dataflow ./claude_desktop_config.json
+mcp-audit-server scan-dataflow ./claude_desktop_config.json
 
 # Auto-fix security issues in an MCP config
-agent-security fix-config ./claude_desktop_config.json
+mcp-audit-server fix-config ./claude_desktop_config.json
 
 # Harden a system prompt against injection
-agent-security harden-prompt ./system-prompt.txt
+mcp-audit-server harden-prompt ./system-prompt.txt
 
 # Generate a security policy from an MCP config
-agent-security generate-policy ./claude_desktop_config.json
+mcp-audit-server generate-policy ./claude_desktop_config.json
 
 # Retrieve a previous audit report
-agent-security report <audit-id>
+mcp-audit-server report <audit-id>
 
 # Output raw JSON instead of formatted tables
-agent-security scan-config ./config.json --json
+mcp-audit-server scan-config ./config.json --json
 
 # Start in MCP stdio server mode
-agent-security --mcp
+mcp-audit-server --mcp
 ```
 
 ## Environment Variables
@@ -106,7 +108,7 @@ agent-security --mcp
 ## Requirements
 
 - Node.js >= 18
-- A running agent-security audit API (default: `http://127.0.0.1:3091`)
+- A running `mcp-security-audit` service or compatible audit API (default: `http://127.0.0.1:3091`)
 
 ## License
 
