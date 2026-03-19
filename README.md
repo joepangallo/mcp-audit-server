@@ -2,7 +2,15 @@
 
 Thin MCP server and CLI proxy for AI agent and MCP security auditing. It connects to a private audit API to analyze MCP configurations, test prompt injection resistance, trace data flows, scan packages, and generate security policies.
 
-This package is a thin proxy. All scan logic lives in a private backend operated by you or your provider. For hosted deployments, set `AGENT_SECURITY_BASE_URL` to your HTTPS API origin.
+This package is a thin proxy. All scan logic lives in a private backend operated by you or your provider.
+
+Managed hosted flow:
+- set `AGENT_SECURITY_API_KEY`
+- the package will automatically target `https://mcpaudit.metaltorque.dev`
+
+Self-hosted or private-network flow:
+- set `AGENT_SECURITY_BASE_URL` to your HTTPS API origin
+- or set `AGENT_SECURITY_HOST` and `AGENT_SECURITY_PORT` for a loopback/private deployment
 
 Hosted backend access is not bundled with this package. If you want managed access or a licensed private deployment, contact [Ledd Consulting](https://leddconsulting.com).
 
@@ -26,11 +34,16 @@ Add to your MCP client configuration (Claude Desktop, Cursor, etc.):
   "mcpServers": {
     "mcp-audit-server": {
       "command": "npx",
-      "args": ["-y", "ledd-mcp-audit-server", "--mcp"]
+      "args": ["-y", "ledd-mcp-audit-server", "--mcp"],
+      "env": {
+        "AGENT_SECURITY_API_KEY": "your-issued-api-key"
+      }
     }
   }
 }
 ```
+
+For a self-hosted backend, add `AGENT_SECURITY_BASE_URL` to that same `env` block.
 
 The server exposes 9 tools over stdio:
 
@@ -51,6 +64,9 @@ The server exposes 9 tools over stdio:
 The CLI forwards commands to the private audit API.
 
 ```bash
+# Hosted quick start
+export AGENT_SECURITY_API_KEY=your-issued-api-key
+
 # Audit an MCP configuration file
 mcp-audit-server scan-config ./claude_desktop_config.json
 
@@ -85,14 +101,17 @@ mcp-audit-server scan-config ./config.json --json
 mcp-audit-server --mcp
 ```
 
+For a self-hosted backend, also set `AGENT_SECURITY_BASE_URL=https://your-audit-host`.
+
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `AGENT_SECURITY_BASE_URL` | (none) | Full audit API origin, e.g. `https://audit.example.com` |
-| `AGENT_SECURITY_HOST` | `127.0.0.1` | Audit API host |
-| `AGENT_SECURITY_PORT` | `3091` | Audit API port |
-| `AGENT_SECURITY_API_KEY` | (none) | API key for authenticated access |
+| `AGENT_SECURITY_HOST` | `127.0.0.1` | Self-hosted/private-network audit API host |
+| `AGENT_SECURITY_PORT` | `3091` | Self-hosted/private-network audit API port |
+| `AGENT_SECURITY_API_KEY` | (none) | API key for authenticated access. If set with no endpoint overrides, the package uses `https://mcpaudit.metaltorque.dev` |
+| `AGENT_SECURITY_REQUEST_TIMEOUT_MS` | `15000` | Request timeout for CLI and MCP proxy calls |
 | `AGENT_SECURITY_ADMIN_MODE` | (none) | Set to `1` to enable active server probing |
 
 ## What It Detects
@@ -114,7 +133,7 @@ mcp-audit-server --mcp
 ## Requirements
 
 - Node.js >= 18
-- Access to a private audit API. Use `AGENT_SECURITY_BASE_URL` for hosted HTTPS deployments, or `AGENT_SECURITY_HOST` and `AGENT_SECURITY_PORT` for local/private-network deployments.
+- Access to a private audit API. The managed hosted default is `https://mcpaudit.metaltorque.dev` when `AGENT_SECURITY_API_KEY` is set. Use `AGENT_SECURITY_BASE_URL` for other hosted HTTPS deployments, or `AGENT_SECURITY_HOST` and `AGENT_SECURITY_PORT` for local/private-network deployments.
 
 ## License
 

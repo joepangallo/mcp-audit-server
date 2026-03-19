@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.0.1 (2026-03-19)
+
+### Added
+- Managed hosted flow now auto-targets `https://mcpaudit.metaltorque.dev` when `AGENT_SECURITY_API_KEY` is set and no explicit endpoint override is configured.
+- Clearer CLI and MCP auth guidance when the proxy receives a `401 Unauthorized` response.
+- MCP client and CLI docs now show the API-key based hosted setup directly.
+
+### Changed
+- Updated the recommended MCP configuration to pass `AGENT_SECURITY_API_KEY` via the client `env` block.
+
 ## 2.0.0 (2026-03-15)
 
 ### Breaking Changes

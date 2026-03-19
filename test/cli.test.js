@@ -104,3 +104,41 @@ describe("CLI — parsing", () => {
     assert.equal(parsed.jsonMode, true);
   });
 });
+
+describe("CLI — auth guidance", () => {
+  it("buildUnauthorizedMessage points hosted users at AGENT_SECURITY_API_KEY", () => {
+    const savedBaseUrl = process.env.AGENT_SECURITY_BASE_URL;
+    const savedApiKey = process.env.AGENT_SECURITY_API_KEY;
+
+    delete process.env.AGENT_SECURITY_API_KEY;
+    process.env.AGENT_SECURITY_BASE_URL = "https://mcpaudit.metaltorque.dev";
+
+    delete require.cache[require.resolve("../index.js")];
+    delete require.cache[require.resolve("../cli.js")];
+    const cliModule = require("../cli.js");
+
+    assert.match(
+      cliModule.testOnly.buildUnauthorizedMessage("Unauthorized."),
+      /AGENT_SECURITY_API_KEY/
+    );
+    assert.match(
+      cliModule.testOnly.buildUnauthorizedMessage("Unauthorized."),
+      /mcpaudit\.metaltorque\.dev/
+    );
+
+    if (savedBaseUrl === undefined) {
+      delete process.env.AGENT_SECURITY_BASE_URL;
+    } else {
+      process.env.AGENT_SECURITY_BASE_URL = savedBaseUrl;
+    }
+
+    if (savedApiKey === undefined) {
+      delete process.env.AGENT_SECURITY_API_KEY;
+    } else {
+      process.env.AGENT_SECURITY_API_KEY = savedApiKey;
+    }
+
+    delete require.cache[require.resolve("../index.js")];
+    delete require.cache[require.resolve("../cli.js")];
+  });
+});

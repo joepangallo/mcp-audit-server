@@ -2,7 +2,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { BASE_URL } = require("./index");
+const { BASE_URL, DEFAULT_HOSTED_BASE_URL } = require("./index");
 
 const API_KEY = process.env.AGENT_SECURITY_API_KEY || "";
 const ADMIN_MODE_ENABLED = process.env.AGENT_SECURITY_ADMIN_MODE === "1";
@@ -30,13 +30,27 @@ function printUsage() {
       "  --json           Output raw JSON instead of formatted tables",
       "",
       "Environment Variables:",
-      "  AGENT_SECURITY_BASE_URL        Full audit API origin, e.g. https://audit.example.com",
-      "  AGENT_SECURITY_HOST            Server host (default: 127.0.0.1)",
-      "  AGENT_SECURITY_PORT            Server port (default: 3091)",
-      "  AGENT_SECURITY_API_KEY         API key for remote access (optional)",
+      `  AGENT_SECURITY_BASE_URL        Full audit API origin, e.g. https://audit.example.com`,
+      "  AGENT_SECURITY_HOST            Self-hosted/private-network host (default: 127.0.0.1)",
+      "  AGENT_SECURITY_PORT            Self-hosted/private-network port (default: 3091)",
+      `  AGENT_SECURITY_API_KEY         API key; if set without endpoint overrides, ${DEFAULT_HOSTED_BASE_URL} is used`,
+      "  AGENT_SECURITY_REQUEST_TIMEOUT_MS  Request timeout in milliseconds (default: 15000)",
       "  AGENT_SECURITY_ADMIN_MODE      Enable active server probing (set to \"1\")"
     ].join("\n") + "\n"
   );
+}
+
+function buildUnauthorizedMessage(baseMessage) {
+  const message = typeof baseMessage === "string" && baseMessage.trim() ? baseMessage.trim() : "Unauthorized.";
+  if (API_KEY) {
+    return message;
+  }
+
+  if (BASE_URL === DEFAULT_HOSTED_BASE_URL) {
+    return `${message} Set AGENT_SECURITY_API_KEY to use the hosted audit API at ${DEFAULT_HOSTED_BASE_URL}.`;
+  }
+
+  return `${message} Set AGENT_SECURITY_API_KEY for ${BASE_URL} access.`;
 }
 
 async function callApi(method, pathname, payload) {
@@ -73,6 +87,9 @@ async function callApi(method, pathname, payload) {
     throw new Error(`Request failed with status ${response.status} (non-JSON response).`);
   }
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error(buildUnauthorizedMessage(body && body.error));
+    }
     throw new Error(body && body.error ? body.error : `Request failed with status ${response.status}`);
   }
 
@@ -403,6 +420,7 @@ if (require.main === module) {
 module.exports = {
   main,
   testOnly: {
+    buildUnauthorizedMessage,
     parseCliArgs
   }
 };

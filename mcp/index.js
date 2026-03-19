@@ -6,7 +6,7 @@
  */
 
 const AUDIT_API_KEY = process.env.AGENT_SECURITY_API_KEY || "";
-const { BASE_URL: AUDIT_BASE_URL } = require("../index");
+const { BASE_URL: AUDIT_BASE_URL, DEFAULT_HOSTED_BASE_URL } = require("../index");
 const { version: APP_VERSION } = require("../package.json");
 const REQUEST_TIMEOUT_MS = Number.parseInt(process.env.AGENT_SECURITY_REQUEST_TIMEOUT_MS || "", 10) || 15_000;
 const ACTIVE_SERVER_PROBING_DISABLED_MESSAGE = "Active server probing is disabled unless AGENT_SECURITY_ADMIN_MODE=1.";
@@ -163,6 +163,19 @@ async function callAuditApi(method, apiPath, payload) {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      const baseMessage = body && body.error ? body.error : "Unauthorized.";
+      if (!AUDIT_API_KEY && AUDIT_BASE_URL === DEFAULT_HOSTED_BASE_URL) {
+        return {
+          error: `${baseMessage} Set AGENT_SECURITY_API_KEY to use the hosted audit API at ${DEFAULT_HOSTED_BASE_URL}.`
+        };
+      }
+      if (!AUDIT_API_KEY) {
+        return {
+          error: `${baseMessage} Set AGENT_SECURITY_API_KEY for ${AUDIT_BASE_URL} access.`
+        };
+      }
+    }
     return { error: body.error || `Audit API returned status ${response.status}` };
   }
 

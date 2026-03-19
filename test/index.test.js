@@ -51,10 +51,24 @@ describe("index.js exports", () => {
     delete process.env.AGENT_SECURITY_BASE_URL;
     delete process.env.AGENT_SECURITY_HOST;
     delete process.env.AGENT_SECURITY_PORT;
+    delete process.env.AGENT_SECURITY_API_KEY;
 
     delete require.cache[require.resolve("../index.js")];
     const { BASE_URL } = require("../index.js");
     assert.equal(BASE_URL, "http://127.0.0.1:3091");
+  });
+
+  it("BASE_URL defaults to the hosted origin when only AGENT_SECURITY_API_KEY is set", () => {
+    delete process.env.AGENT_SECURITY_BASE_URL;
+    delete process.env.AGENT_SECURITY_HOST;
+    delete process.env.AGENT_SECURITY_PORT;
+    process.env.AGENT_SECURITY_API_KEY = "test-key";
+
+    delete require.cache[require.resolve("../index.js")];
+    const { BASE_URL, DEFAULT_HOSTED_BASE_URL } = require("../index.js");
+    assert.equal(BASE_URL, DEFAULT_HOSTED_BASE_URL);
+
+    delete process.env.AGENT_SECURITY_API_KEY;
   });
 
   it("BASE_URL respects AGENT_SECURITY_BASE_URL and trims trailing slashes", () => {
@@ -63,6 +77,21 @@ describe("index.js exports", () => {
     const { BASE_URL } = require("../index.js");
     assert.equal(BASE_URL, "https://audit.example.com");
     delete process.env.AGENT_SECURITY_BASE_URL;
+  });
+
+  it("explicit loopback host/port override wins over hosted auto-targeting", () => {
+    delete process.env.AGENT_SECURITY_BASE_URL;
+    process.env.AGENT_SECURITY_API_KEY = "test-key";
+    process.env.AGENT_SECURITY_HOST = "127.0.0.1";
+    process.env.AGENT_SECURITY_PORT = "4012";
+
+    delete require.cache[require.resolve("../index.js")];
+    const { BASE_URL } = require("../index.js");
+    assert.equal(BASE_URL, "http://127.0.0.1:4012");
+
+    delete process.env.AGENT_SECURITY_API_KEY;
+    delete process.env.AGENT_SECURITY_HOST;
+    delete process.env.AGENT_SECURITY_PORT;
   });
 
   it("rejects non-loopback host/port fallback without AGENT_SECURITY_BASE_URL", () => {

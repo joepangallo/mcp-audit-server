@@ -109,6 +109,49 @@ describe("MCP proxy — runAuditTool", () => {
     assert.equal(combined.score, 82);
     assert.equal(combined.grade, "B-");
   });
+
+  it("returns hosted auth guidance on 401 when no API key is configured", async () => {
+    const savedBaseUrl = process.env.AGENT_SECURITY_BASE_URL;
+    const savedApiKey = process.env.AGENT_SECURITY_API_KEY;
+    const originalFetch = global.fetch;
+
+    process.env.AGENT_SECURITY_BASE_URL = "https://mcpaudit.metaltorque.dev";
+    delete process.env.AGENT_SECURITY_API_KEY;
+    global.fetch = async () => ({
+      ok: false,
+      status: 401,
+      text: async () => JSON.stringify({ error: "Unauthorized." })
+    });
+
+    delete require.cache[require.resolve("../index.js")];
+    delete require.cache[require.resolve("../mcp/index.js")];
+    const freshModule = require("../mcp/index.js");
+
+    try {
+      const result = await freshModule.runAuditTool("audit_mcp_config", {
+        config: "{\"mcpServers\":{}}"
+      });
+      assert.match(result.error, /AGENT_SECURITY_API_KEY/);
+      assert.match(result.error, /mcpaudit\.metaltorque\.dev/);
+    } finally {
+      global.fetch = originalFetch;
+
+      if (savedBaseUrl === undefined) {
+        delete process.env.AGENT_SECURITY_BASE_URL;
+      } else {
+        process.env.AGENT_SECURITY_BASE_URL = savedBaseUrl;
+      }
+
+      if (savedApiKey === undefined) {
+        delete process.env.AGENT_SECURITY_API_KEY;
+      } else {
+        process.env.AGENT_SECURITY_API_KEY = savedApiKey;
+      }
+
+      delete require.cache[require.resolve("../index.js")];
+      delete require.cache[require.resolve("../mcp/index.js")];
+    }
+  });
 });
 
 describe("MCP proxy — rate limiting", () => {
