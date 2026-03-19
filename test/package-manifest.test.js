@@ -29,6 +29,7 @@ test("npm pack dry-run includes the public proxy entrypoints", async () => {
     assert.ok(filePaths.has("cli.js"));
     assert.ok(filePaths.has("CHANGELOG.md"));
     assert.ok(filePaths.has("MIGRATION.md"));
+    assert.ok(filePaths.has("server.json"));
   } finally {
     await fs.promises.rm(cacheDir, { recursive: true, force: true });
   }

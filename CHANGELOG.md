@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.0.2 (2026-03-19)
+
+### Added
+- Added official MCP Registry metadata with `mcpName` and root `server.json`.
+- Added registry-ready environment variable metadata for `AGENT_SECURITY_API_KEY` and optional `AGENT_SECURITY_BASE_URL`.
+
+### Changed
+- Published package now includes `server.json` for registry/discovery tooling.
+
 ## 2.0.1 (2026-03-19)
 
 ### Added
