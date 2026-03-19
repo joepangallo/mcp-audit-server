@@ -4,6 +4,7 @@ state.sqlite-shm
 state.sqlite-wal
 *.log
 .env
+.mcpregistry_*
 
 # VPS service files (not part of this package)
 /index.js
