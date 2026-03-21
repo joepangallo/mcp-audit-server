@@ -115,7 +115,7 @@ describe("MCP proxy — runAuditTool", () => {
     const savedApiKey = process.env.AGENT_SECURITY_API_KEY;
     const originalFetch = global.fetch;
 
-    process.env.AGENT_SECURITY_BASE_URL = "https://mcpaudit.metaltorque.dev";
+    process.env.AGENT_SECURITY_BASE_URL = "https://audit.leddconsulting.com";
     delete process.env.AGENT_SECURITY_API_KEY;
     global.fetch = async () => ({
       ok: false,
@@ -132,7 +132,7 @@ describe("MCP proxy — runAuditTool", () => {
         config: "{\"mcpServers\":{}}"
       });
       assert.match(result.error, /AGENT_SECURITY_API_KEY/);
-      assert.match(result.error, /mcpaudit\.metaltorque\.dev/);
+      assert.match(result.error, /audit\.leddconsulting\.com/);
     } finally {
       global.fetch = originalFetch;
 

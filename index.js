@@ -3,7 +3,7 @@
  *
  * This package is a thin MCP interface to a private audit API. Local/self-hosted
  * deployments can target a loopback API on http://127.0.0.1:3091, while the
- * managed hosted flow auto-targets https://mcpaudit.metaltorque.dev when an
+ * managed hosted flow auto-targets https://audit.leddconsulting.com when an
  * API key is present and no explicit endpoint override is set.
  *
  * Start the MCP server:   node mcp/index.js
@@ -12,7 +12,7 @@
 
 const net = require("net");
 
-const DEFAULT_HOSTED_BASE_URL = "https://mcpaudit.metaltorque.dev";
+const DEFAULT_HOSTED_BASE_URL = "https://audit.leddconsulting.com";
 const RAW_BASE_URL = process.env.AGENT_SECURITY_BASE_URL;
 const RAW_HOST = process.env.AGENT_SECURITY_HOST;
 const RAW_PORT = process.env.AGENT_SECURITY_PORT;

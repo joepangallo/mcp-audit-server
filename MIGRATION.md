@@ -31,7 +31,7 @@ If you launch the MCP proxy through `npx`, update your client config:
 }
 ```
 
-If `AGENT_SECURITY_API_KEY` is set and no endpoint override is provided, the proxy will automatically target `https://mcpaudit.metaltorque.dev`. For self-hosted backends, also set `AGENT_SECURITY_BASE_URL`.
+If `AGENT_SECURITY_API_KEY` is set and no endpoint override is provided, the proxy will automatically target `https://audit.leddconsulting.com`. For self-hosted backends, also set `AGENT_SECURITY_BASE_URL`.
 
 ## Package Split
 

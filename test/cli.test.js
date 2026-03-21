@@ -111,7 +111,7 @@ describe("CLI — auth guidance", () => {
     const savedApiKey = process.env.AGENT_SECURITY_API_KEY;
 
     delete process.env.AGENT_SECURITY_API_KEY;
-    process.env.AGENT_SECURITY_BASE_URL = "https://mcpaudit.metaltorque.dev";
+    process.env.AGENT_SECURITY_BASE_URL = "https://audit.leddconsulting.com";
 
     delete require.cache[require.resolve("../index.js")];
     delete require.cache[require.resolve("../cli.js")];
@@ -123,7 +123,7 @@ describe("CLI — auth guidance", () => {
     );
     assert.match(
       cliModule.testOnly.buildUnauthorizedMessage("Unauthorized."),
-      /mcpaudit\.metaltorque\.dev/
+      /audit\.leddconsulting\.com/
     );
 
     if (savedBaseUrl === undefined) {

@@ -6,7 +6,7 @@ This package is a thin proxy. All scan logic lives in a private backend operated
 
 Managed hosted flow:
 - set `AGENT_SECURITY_API_KEY`
-- the package will automatically target `https://mcpaudit.metaltorque.dev`
+- the package will automatically target `https://audit.leddconsulting.com`
 
 Self-hosted or private-network flow:
 - set `AGENT_SECURITY_BASE_URL` to your HTTPS API origin
@@ -119,7 +119,7 @@ For a self-hosted backend, also set `AGENT_SECURITY_BASE_URL=https://your-audit-
 | `AGENT_SECURITY_BASE_URL` | (none) | Full audit API origin, e.g. `https://audit.example.com` |
 | `AGENT_SECURITY_HOST` | `127.0.0.1` | Self-hosted/private-network audit API host |
 | `AGENT_SECURITY_PORT` | `3091` | Self-hosted/private-network audit API port |
-| `AGENT_SECURITY_API_KEY` | (none) | API key for authenticated access. If set with no endpoint overrides, the package uses `https://mcpaudit.metaltorque.dev` |
+| `AGENT_SECURITY_API_KEY` | (none) | API key for authenticated access. If set with no endpoint overrides, the package uses `https://audit.leddconsulting.com` |
 | `AGENT_SECURITY_REQUEST_TIMEOUT_MS` | `15000` | Request timeout for CLI and MCP proxy calls |
 | `AGENT_SECURITY_ADMIN_MODE` | (none) | Set to `1` to enable active server probing |
 
@@ -142,7 +142,7 @@ For a self-hosted backend, also set `AGENT_SECURITY_BASE_URL=https://your-audit-
 ## Requirements
 
 - Node.js >= 18
-- Access to a private audit API. The managed hosted default is `https://mcpaudit.metaltorque.dev` when `AGENT_SECURITY_API_KEY` is set. Use `AGENT_SECURITY_BASE_URL` for other hosted HTTPS deployments, or `AGENT_SECURITY_HOST` and `AGENT_SECURITY_PORT` for local/private-network deployments.
+- Access to a private audit API. The managed hosted default is `https://audit.leddconsulting.com` when `AGENT_SECURITY_API_KEY` is set. Use `AGENT_SECURITY_BASE_URL` for other hosted HTTPS deployments, or `AGENT_SECURITY_HOST` and `AGENT_SECURITY_PORT` for local/private-network deployments.
 
 ## License
 

@@ -3,6 +3,7 @@
 ## Unreleased
 
 ### Changed
+- Switched the managed hosted default from `https://mcpaudit.metaltorque.dev` to `https://audit.leddconsulting.com`.
 - Clarified the public distribution model in the docs: npm package plus official MCP Registry first, with downstream directories syncing from that source.
 - Documented that Glama claim is optional and only needed for page ownership and manual sync controls.
 
@@ -18,7 +19,7 @@
 ## 2.0.1 (2026-03-19)
 
 ### Added
-- Managed hosted flow now auto-targets `https://mcpaudit.metaltorque.dev` when `AGENT_SECURITY_API_KEY` is set and no explicit endpoint override is configured.
+- Managed hosted flow now auto-targets `https://audit.leddconsulting.com` when `AGENT_SECURITY_API_KEY` is set and no explicit endpoint override is configured.
 - Clearer CLI and MCP auth guidance when the proxy receives a `401 Unauthorized` response.
 - MCP client and CLI docs now show the API-key based hosted setup directly.
 
