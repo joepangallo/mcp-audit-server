@@ -3,10 +3,11 @@ const assert = require("node:assert/strict");
 const mcpModule = require("../mcp/index.js");
 
 describe("MCP proxy — tool definitions", () => {
-  it("defines exactly 9 tools", () => {
+  it("defines exactly 10 tools", () => {
     const expectedTools = [
       "audit_mcp_config",
       "audit_mcp_server",
+      "audit_agent_trust",
       "audit_prompt_injection",
       "audit_agent_dataflow",
       "scan_mcp_package",
@@ -88,6 +89,7 @@ describe("MCP proxy — runAuditTool", () => {
     const combined = mcpModule.testOnly.combineReports([
       {
         id: "a",
+        trust: { score: 91 },
         findings: [
           { severity: "high", source: "a", cwe: "shell_injection", description: "Issue A" },
           { severity: "high", source: "a", cwe: "shell_injection", description: "Issue A" },
@@ -95,6 +97,7 @@ describe("MCP proxy — runAuditTool", () => {
       },
       {
         id: "b",
+        trust: { score: 74 },
         findings: [
           { severity: "medium", source: "b", cwe: "info_disclosure", description: "Issue B" },
         ],
@@ -108,6 +111,8 @@ describe("MCP proxy — runAuditTool", () => {
     assert.equal(combined.findingsSummary.medium, 1);
     assert.equal(combined.score, 82);
     assert.equal(combined.grade, "B-");
+    assert.equal(combined.trustSummary.minimumScore, 74);
+    assert.equal(combined.trustSummary.averageScore, 83);
   });
 
   it("returns hosted auth guidance on 401 when no API key is configured", async () => {

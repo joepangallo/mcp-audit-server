@@ -40,6 +40,18 @@ const toolDefinitions = [
     }
   },
   {
+    name: "audit_agent_trust",
+    description: "Audit an MCP or agent deployment for tool-permission inventory, execution provenance coverage, secret exposure controls, policy drift, and an overall trust score.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        mcp_config: { type: "string", description: "Raw MCP config JSON or deployment manifest." },
+        claimed_policy: { type: "string", description: "Optional claimed safety policy or deployment contract to diff against observed config." }
+      },
+      required: ["mcp_config"]
+    }
+  },
+  {
     name: "audit_prompt_injection",
     description: "Perform a static prompt-hardening review against a 30+ payload prompt-injection catalog.",
     inputSchema: {
@@ -121,6 +133,7 @@ const toolDefinitions = [
 const toolRoutes = {
   audit_mcp_config:      { method: "POST", path: "/audit/config",    body: (a) => ({ config: a.config }) },
   audit_mcp_server:      { method: "POST", path: "/audit/server",    body: (a) => ({ command: a.command, args: a.args, env: a.env }) },
+  audit_agent_trust:     { method: "POST", path: "/audit/trust",     body: (a) => ({ mcp_config: a.mcp_config, claimed_policy: a.claimed_policy }) },
   audit_prompt_injection: { method: "POST", path: "/audit/injection", body: (a) => ({ system_prompt: a.system_prompt, tools: a.tools }) },
   audit_agent_dataflow:  { method: "POST", path: "/audit/dataflow",  body: (a) => ({ mcp_config: a.mcp_config, test_pii: a.test_pii }) },
   scan_mcp_package:      { method: "POST", path: "/audit/package",   body: (a) => ({ package_name: a.package_name }) },
@@ -291,11 +304,32 @@ function buildExecutiveSummary(summary, score, grade, count) {
   ].join(" ");
 }
 
+function summarizeTrustReports(reports) {
+  const trustScores = reports
+    .map((report) => report?.trust?.score ?? report?.trustSummary?.score ?? report?.trustScore)
+    .filter((value) => typeof value === "number");
+
+  if (!trustScores.length) {
+    return null;
+  }
+
+  const minScore = Math.min(...trustScores);
+  const averageScore = Math.round(trustScores.reduce((sum, value) => sum + value, 0) / trustScores.length);
+
+  return {
+    averageScore,
+    minimumScore: minScore,
+    grade: calculateGrade(minScore),
+    reportsCovered: trustScores.length
+  };
+}
+
 function combineReports(reports, sourceAuditIds) {
   const findings = dedupeFindings(reports.flatMap((report) => Array.isArray(report.findings) ? report.findings : []));
   const score = calculateScore(findings);
   const grade = calculateGrade(score);
   const findingsSummary = summarizeFindings(findings);
+  const trustSummary = summarizeTrustReports(reports);
 
   return {
     id: sourceAuditIds.join(","),
@@ -306,8 +340,11 @@ function combineReports(reports, sourceAuditIds) {
     grade,
     findings,
     findingsSummary,
+    trustSummary,
     sourceAuditIds,
-    executiveSummary: buildExecutiveSummary(findingsSummary, score, grade, reports.length),
+    executiveSummary: buildExecutiveSummary(findingsSummary, score, grade, reports.length) + (trustSummary
+      ? ` Minimum trust score across included audits: ${trustSummary.minimumScore}/100 (${trustSummary.grade}).`
+      : ""),
     generatedAt: new Date().toISOString()
   };
 }
@@ -429,6 +466,7 @@ module.exports = {
   testOnly: {
     ACTIVE_SERVER_PROBING_DISABLED_MESSAGE,
     combineReports,
+    summarizeTrustReports,
     toolDefinitions
   }
 };

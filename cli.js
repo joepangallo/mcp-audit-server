@@ -16,6 +16,7 @@ function printUsage() {
       "  mcp-audit-server scan-config <file>         Audit an MCP config file",
       "  mcp-audit-server scan-server <command> [args...]  Probe a running MCP server",
       "  mcp-audit-server scan-package <name>         Audit an npm package",
+      "  mcp-audit-server scan-trust <config> [policy] Audit agent trust posture, tool permissions, provenance, and policy drift",
       "  mcp-audit-server scan-injection <file>       Test a system prompt for injection vulnerabilities",
       "  mcp-audit-server scan-dataflow <file>        Trace data flows through an MCP config",
       "  mcp-audit-server fix-config <file>           Auto-fix security issues in an MCP config",
@@ -226,6 +227,75 @@ function formatGeneratePolicy(result) {
   }
 }
 
+function formatTrustAudit(result) {
+  const trust = result.trust || result.trustSummary || result;
+  const trustScore = trust.score ?? result.score ?? "";
+  const trustGrade = trust.grade ?? result.grade ?? "";
+
+  console.table([
+    {
+      id: result.id || "",
+      target: result.target || "",
+      status: result.status || "",
+      trustScore,
+      trustGrade,
+      networkPolicy: trust.networkPolicy || "",
+      provenanceCoverage: trust.provenanceCoverage || "",
+    }
+  ]);
+
+  if (Array.isArray(trust.toolPermissionInventory) && trust.toolPermissionInventory.length) {
+    process.stdout.write("\nTool permission inventory:\n");
+    console.table(trust.toolPermissionInventory.map((entry) => ({
+      tool: entry.tool || "",
+      enabled: entry.enabled !== false,
+      permission: entry.permission || entry.scope || "",
+      risk: entry.risk || entry.trustLevel || "",
+      notes: entry.notes || entry.detail || "",
+    })));
+  }
+
+  if (Array.isArray(trust.actionLogSummary?.actions) && trust.actionLogSummary.actions.length) {
+    process.stdout.write("\nObserved execution provenance:\n");
+    console.table(trust.actionLogSummary.actions.map((entry) => ({
+      action: entry.action || entry.type || "",
+      count: entry.count ?? "",
+      evidence: entry.evidence || entry.artifact || "",
+      risk: entry.risk || "",
+    })));
+  }
+
+  if (Array.isArray(trust.secretExposureChecks) && trust.secretExposureChecks.length) {
+    process.stdout.write("\nSecret exposure checks:\n");
+    console.table(trust.secretExposureChecks.map((entry) => ({
+      check: entry.name || entry.check || "",
+      status: entry.status || "",
+      exposure: entry.exposure || entry.result || "",
+      evidence: entry.evidence || entry.detail || "",
+    })));
+  }
+
+  if (Array.isArray(trust.policyDiff) && trust.policyDiff.length) {
+    process.stdout.write("\nClaimed-vs-observed policy drift:\n");
+    console.table(trust.policyDiff.map((entry) => ({
+      control: entry.control || "",
+      claimed: entry.claimed || "",
+      observed: entry.observed || "",
+      status: entry.status || "",
+    })));
+  }
+
+  if (Array.isArray(result.findings) && result.findings.length) {
+    process.stdout.write("\nFindings:\n");
+    console.table(result.findings.map((finding) => ({
+      severity: finding.severity || "",
+      source: finding.source || "",
+      description: finding.description || "",
+      location: finding.location || "",
+    })));
+  }
+}
+
 async function main() {
   const parsedArgs = parseCliArgs(process.argv.slice(2));
   const { command, args, jsonMode } = parsedArgs;
@@ -294,6 +364,34 @@ async function main() {
         process.stdout.write(JSON.stringify(report, null, 2) + "\n");
       } else {
         formatReport(report);
+      }
+      return;
+    }
+
+    if (command === "scan-trust") {
+      const configPath = args[0];
+      if (!configPath) {
+        throw new Error("scan-trust requires a config file path.");
+      }
+
+      const absoluteConfigPath = path.resolve(process.cwd(), configPath);
+      const mcpConfig = await fs.promises.readFile(absoluteConfigPath, "utf8");
+
+      let claimedPolicy;
+      if (args[1]) {
+        const absolutePolicyPath = path.resolve(process.cwd(), args[1]);
+        claimedPolicy = await fs.promises.readFile(absolutePolicyPath, "utf8");
+      }
+
+      const report = await callApi("POST", "/audit/trust", {
+        mcp_config: mcpConfig,
+        claimed_policy: claimedPolicy,
+      });
+
+      if (jsonMode) {
+        process.stdout.write(JSON.stringify(report, null, 2) + "\n");
+      } else {
+        formatTrustAudit(report);
       }
       return;
     }
@@ -421,6 +519,7 @@ module.exports = {
   main,
   testOnly: {
     buildUnauthorizedMessage,
+    formatTrustAudit,
     parseCliArgs
   }
 };

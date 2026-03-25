@@ -103,6 +103,13 @@ describe("CLI — parsing", () => {
     assert.deepEqual(parsed.args, ["node", "server.js"]);
     assert.equal(parsed.jsonMode, true);
   });
+
+  it("supports scan-trust arguments with optional policy file", () => {
+    const parsed = testOnly.parseCliArgs(["scan-trust", "config.json", "policy.json", "--json"]);
+    assert.equal(parsed.command, "scan-trust");
+    assert.deepEqual(parsed.args, ["config.json", "policy.json"]);
+    assert.equal(parsed.jsonMode, true);
+  });
 });
 
 describe("CLI — auth guidance", () => {
@@ -140,5 +147,51 @@ describe("CLI — auth guidance", () => {
 
     delete require.cache[require.resolve("../index.js")];
     delete require.cache[require.resolve("../cli.js")];
+  });
+});
+
+describe("CLI — trust formatter", () => {
+  it("formats trust audits with inventories and policy drift", () => {
+    const originalTable = console.table;
+    const tables = [];
+    const writes = [];
+    console.table = (value) => tables.push(value);
+    const originalWrite = process.stdout.write;
+    process.stdout.write = ((chunk) => {
+      writes.push(String(chunk));
+      return true;
+    });
+
+    try {
+      testOnly.formatTrustAudit({
+        id: "trust-1",
+        target: "demo",
+        status: "completed",
+        trust: {
+          score: 74,
+          grade: "C",
+          networkPolicy: "allowlist",
+          provenanceCoverage: "observed",
+          toolPermissionInventory: [
+            { tool: "Bash", enabled: true, permission: "workspace-only", risk: "high" },
+          ],
+          secretExposureChecks: [
+            { name: "env-scan", status: "passed", exposure: "none" },
+          ],
+          policyDiff: [
+            { control: "network", claimed: "disabled", observed: "allowlist", status: "drift" },
+          ],
+        },
+        findings: [
+          { severity: "medium", source: "trust", description: "Open network policy" },
+        ],
+      });
+    } finally {
+      console.table = originalTable;
+      process.stdout.write = originalWrite;
+    }
+
+    assert.equal(tables.length >= 4, true);
+    assert.match(writes.join(""), /Claimed-vs-observed policy drift/);
   });
 });

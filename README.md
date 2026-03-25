@@ -54,12 +54,13 @@ Add to your MCP client configuration (Claude Desktop, Cursor, etc.):
 
 For a self-hosted backend, add `AGENT_SECURITY_BASE_URL` to that same `env` block.
 
-The server exposes 9 tools over stdio:
+The server exposes 10 tools over stdio:
 
 | Tool | Description |
 |------|-------------|
 | `audit_mcp_config` | Static analysis of MCP config JSON for privilege, auth, transport, and launch risks |
 | `audit_mcp_server` | Active probing of a running MCP server over stdio (requires `AGENT_SECURITY_ADMIN_MODE=1`) |
+| `audit_agent_trust` | Trust audit for tool permissions, execution provenance, secret exposure controls, policy drift, and deployment trust score |
 | `audit_prompt_injection` | Tests a system prompt against a 30+ payload injection catalog |
 | `audit_agent_dataflow` | Traces PII and secret exposure through an agent's tool pipeline |
 | `scan_mcp_package` | Scans an npm MCP package for dependency vulnerabilities and dangerous patterns |
@@ -81,6 +82,9 @@ mcp-audit-server scan-config ./claude_desktop_config.json
 
 # Probe a live MCP server (requires AGENT_SECURITY_ADMIN_MODE=1)
 mcp-audit-server scan-server npx -y @modelcontextprotocol/server-filesystem /tmp
+
+# Audit trust posture and policy drift for an agent/MCP deployment
+mcp-audit-server scan-trust ./claude_desktop_config.json ./claimed-policy.json
 
 # Scan an npm package for vulnerabilities
 mcp-audit-server scan-package @modelcontextprotocol/server-shell
@@ -138,6 +142,8 @@ For a self-hosted backend, also set `AGENT_SECURITY_BASE_URL=https://your-audit-
 - **Rate limiting** -- missing request throttling on exposed tools
 - **Package vulnerabilities** -- known CVEs in npm MCP package dependencies
 - **Credential exposure** -- inline secrets, missing rotation policies
+- **Agent trust drift** -- claimed-safe policies that do not match configured tools, network posture, or observed action logs
+- **Weak provenance** -- missing action/evidence capture for risky agent operations
 
 ## Requirements
 
